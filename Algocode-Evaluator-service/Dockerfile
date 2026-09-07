@@ -7,7 +7,7 @@ COPY package*.json tsconfig.json ./
 RUN npm ci
 
 COPY src/ ./src/
-RUN npm run build
+RUN npx tsc
 
 # Stage 2: Production runtime
 FROM node:20-alpine
