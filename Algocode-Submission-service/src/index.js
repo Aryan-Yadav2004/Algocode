@@ -10,12 +10,12 @@ const fastify = Fastify({ logger: true }); //logger true krne se har request ka 
 
 fastify.register(app);
 
-fastify.listen({port: serviceConfig.PORT}, (err) => {
+fastify.listen({port: serviceConfig.PORT}, async (err) => {
     if (err) {
         fastify.log.error(err);
         process.exit(1);//current running program ko turant band karne
     }
-    connnectToDB();
+    await connnectToDB();
     console.log(`Server up at port ${serviceConfig.PORT}`);
     EvaluatorWorker(evaluator_queue);
 }); 

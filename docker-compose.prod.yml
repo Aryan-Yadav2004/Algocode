@@ -1,0 +1,112 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: algocode-redis
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+
+  problem-service:
+    build:
+      context: ./Algocode-Problem-service
+    container_name: algocode-problem-service
+    restart: always
+    environment:
+      - PORT=3000
+      - ATLAS_DB_URL=${ATLAS_DB_URL}
+      - NODE_ENV=production
+    expose:
+      - "3000"
+
+  submission-service:
+    build:
+      context: ./Algocode-Submission-service
+    container_name: algocode-submission-service
+    restart: always
+    environment:
+      - PORT=3001
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ATLAS_DB_URL=${ATLAS_DB_URL}
+      - PROBLEM_ADMIN_SERVICE_URL=http://problem-service:3000
+      - SOCKET_SERVICE_URL=http://socket-service:3004
+      - NODE_ENV=production
+    depends_on:
+      - redis
+      - problem-service
+    expose:
+      - "3001"
+
+  socket-service:
+    build:
+      context: ./Algocode-Socket-Service
+    container_name: algocode-socket-service
+    restart: always
+    environment:
+      - PORT=3004
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    expose:
+      - "3004"
+
+  evaluator-service:
+    build:
+      context: ./Algocode-Evaluator-service
+    container_name: algocode-evaluator-service
+    restart: always
+    environment:
+      - PORT=3002
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NODE_ENV=production
+    volumes:
+      # Mounts the host Docker socket so the evaluator can launch compilation/execution containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - redis
+    expose:
+      - "3002"
+
+  frontend:
+    build:
+      context: ./AlgoCodeFrontend
+      args:
+        - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
+        - VITE_PROBLEM_SERVICE_BASE_URL=""
+        - VITE_SUBMISSION_SERVICE_BASE_URL=""
+        - VITE_SOCKET_URL=""
+    container_name: algocode-frontend
+    restart: always
+    expose:
+      - "80"
+
+  nginx:
+    image: nginx:alpine
+    container_name: algocode-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/www/certbot
+    depends_on:
+      - frontend
+      - problem-service
+      - submission-service
+      - socket-service
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: algocode-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/www/certbot
+
+volumes:
+  certbot-etc:
+  certbot-var:

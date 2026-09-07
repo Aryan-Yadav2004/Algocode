@@ -36,7 +36,7 @@ async function getProblem(req, res, next) {
 async function getProblems(req, res, next) {
     try {
         const problems = await problemService.getAllProblems();
-        return  res.status(StatusCodes.CREATED).json({success: true, message: 'Succesfully fetched all the problems', error: {}, data: problems});
+        return res.status(StatusCodes.OK).json({success: true, message: 'Successfully fetched all the problems', error: {}, data: problems});
     } catch (error) {
         next(error);
     }

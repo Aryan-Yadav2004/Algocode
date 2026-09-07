@@ -1,66 +1,83 @@
-// import type { Job } from 'bullmq';
-
 import type { Job } from 'bullmq';
 
-import evaluatorQueueProducer from "../producers/evaluatorQueueProducer.js";
+import evaluatorQueueProducer from '../producers/evaluatorQueueProducer.js';
 import type { IJob } from '../types/bullMqJobDefination.js';
 import type { ExecutionResponse } from '../types/CodeExecutorStrategy.js';
 import type { submissionPayload } from '../types/submissionPayload.js';
 import createExecutor from '../utils/ExecutorFactory.js';
 
+/**
+ * SubmissionJob — the BullMQ job handler for code evaluation.
+ *
+ * Responsibilities:
+ *  1. Extract submission payload from the job data
+ *  2. Create the appropriate language executor via ExecutorFactory
+ *  3. Delegate ALL test cases to the executor in a single call
+ *     (the executor manages the container lifecycle internally)
+ *  4. Forward the final ExecutionResponse to the evaluator queue
+ *
+ * What this class does NOT do (by design):
+ *  - It does NOT loop over test cases itself
+ *  - It does NOT manage Docker containers
+ *  - It does NOT know about TLE limits or language specifics
+ *  → All of that is encapsulated in the executor (single responsibility)
+ */
 export default class SubmissionJob implements IJob {
-    name: string
-    payload?: Record<string, submissionPayload>
-    constructor(payload: Record<string,submissionPayload>){
+    name: string;
+    payload?: Record<string, submissionPayload>;
+
+    constructor(payload: Record<string, submissionPayload>) {
         this.payload = payload;
         this.name = this.constructor.name;
     }
 
-    handle = async (job?: Job)  => {
-        console.log('Handler of the job called');
-        // console.log(this.payload);
-        if (job && this.payload) { 
-            const key = Object.keys(this.payload)[0]?.toString();
-            if (key) {
-                // console.log(this.payload[key]?.language);
-                // if(this.payload[key]?.language === 'CPP'){
-                //    const response = await runCpp(this.payload[key]?.code, this.payload[key]?.inputTestCase);
-                //    console.log(response);
-                // }
-                const codeLanguage = this.payload[key]?.language;
-                const code = this.payload[key]?.code;
-                const testCases = this.payload[key]?.testCases;
-                const userId = this.payload[key]?.userId;
-                if(codeLanguage && code && testCases && userId) {
-                    const strategy = createExecutor(codeLanguage);
-                    if(strategy !== null) {
-                        for(let i = 0; i < testCases.length; i++){
-                            const testCase = testCases[i];
-                            if(testCase && (testCase.input || testCase.input === "") && (testCase.output || testCase.output === "")) {
-                                const response : ExecutionResponse = await  strategy.execute(code, testCase.input, testCase.output);
-                                response.userId = userId;
-                                response.submissionId = key;
-                                if(response.status !== "SUCCESS"){
-                                    console.log("Something went wrong with code execution");
-                                    console.log(response);
-                                    await evaluatorQueueProducer(response);
-                                    return;
-                                }
-                                console.log(response);
-                            }
-                        }
-                        await evaluatorQueueProducer({output: "", status: "SUCCESS", userId: userId, submissionId: key});
-                    }
-                }
-            }
+    handle = async (job?: Job): Promise<void> => {
+        console.log('[SubmissionJob] Handler called');
+
+        if (!job || !this.payload) return;
+
+        // The payload key is the submissionId (set by the Submission Service)
+        const submissionId = Object.keys(this.payload)[0]?.toString();
+        if (!submissionId) {
+            console.error('[SubmissionJob] No submissionId found in payload keys');
+            return;
         }
-    }
+
+        const submission = this.payload[submissionId];
+        if (!submission) return;
+
+        const { language, code, testCases, userId } = submission;
+
+        if (!language || !code || !testCases || !userId) {
+            console.error('[SubmissionJob] Incomplete submission payload', { language, userId, submissionId });
+            return;
+        }
+
+        const strategy = createExecutor(language);
+        if (!strategy) {
+            console.error(`[SubmissionJob] No executor found for language: ${language}`);
+            return;
+        }
+
+        console.log(`[SubmissionJob] Evaluating submissionId=${submissionId} language=${language} testCases=${testCases.length}`);
+
+        // Single call — executor handles 1 container + N test case runs internally
+        const response: ExecutionResponse = await strategy.execute(code, testCases, userId, submissionId);
+
+        console.log(`[SubmissionJob] Evaluation complete — status: ${response.status}`);
+        if (response.failedTestCase) {
+            console.log(`[SubmissionJob] Failed at test case #${response.failedTestCase.testCaseIndex}`);
+        }
+
+        // Push result to the evaluator queue so Submission Service can
+        // update MongoDB status and notify the user via Socket Service
+        await evaluatorQueueProducer(response);
+    };
 
     failed = (job?: Job): void => {
-        console.log('Job failed');
+        console.error('[SubmissionJob] Job failed');
         if (job) {
-            console.log(job.id);
+            console.error('[SubmissionJob] Job id:', job.id);
         }
-    }
-
+    };
 }

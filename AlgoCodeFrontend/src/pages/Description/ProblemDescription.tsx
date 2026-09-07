@@ -304,21 +304,56 @@ function Description() {
                                 <p className="mt-2 text-sm text-gray-500">Processing submission...</p>
                             </div>
                         ) : submissionResult ? (
-                            <div className="w-full">
-                                <div className={`alert ${submissionResult.status === 'SUCCESS' ? 'alert-success' : 'alert-error'} mb-4 shadow-lg`}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={submissionResult.status === 'SUCCESS' ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"} /></svg>
+                            <div className="w-full space-y-3">
+                                <div className={`alert ${submissionResult.status === 'SUCCESS' ? 'alert-success' : 'alert-error'} shadow-md`}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                        {submissionResult.status === 'SUCCESS' ? (
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        ) : (
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        )}
+                                    </svg>
                                     <div>
-                                        <h3 className="font-bold">{submissionResult.status}</h3>
-                                        <div className="text-xs">Submission ID: {submissionResult.submissionId}</div>
+                                        <h3 className="font-bold">
+                                            {submissionResult.status === 'SUCCESS' && 'Accepted'}
+                                            {submissionResult.status === 'WA' && `Wrong Answer (Failed on Test Case #${(submissionResult.failedTestCase?.testCaseIndex ?? 0) + 1})`}
+                                            {submissionResult.status === 'TLE' && `Time Limit Exceeded (Test Case #${(submissionResult.failedTestCase?.testCaseIndex ?? 0) + 1})`}
+                                            {submissionResult.status === 'MLE' && `Memory Limit Exceeded (Test Case #${(submissionResult.failedTestCase?.testCaseIndex ?? 0) + 1})`}
+                                            {submissionResult.status === 'RE' && (submissionResult.failedTestCase?.testCaseIndex === -1 ? 'Compilation Error' : `Runtime Error (Test Case #${(submissionResult.failedTestCase?.testCaseIndex ?? 0) + 1})`)}
+                                        </h3>
+                                        <div className="text-xs opacity-80">Submission ID: {submissionResult.submissionId}</div>
                                     </div>
                                 </div>
 
-                                {submissionResult.output && (
-                                    <div className="mockup-code bg-base-300 text-base-content w-full">
-                                        <pre data-prefix="$"><code>Result Output:</code></pre>
-                                        <pre className={`whitespace-pre-wrap px-5 py-2 ${submissionResult.status === 'SUCCESS' ? 'text-success' : 'text-error'}`}>
-                                            {submissionResult.output}
-                                        </pre>
+                                {submissionResult.status === 'SUCCESS' ? (
+                                    <div className="text-success font-medium text-sm px-1">
+                                        ✓ All test cases passed successfully!
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {(submissionResult.failedTestCase?.expected !== undefined || submissionResult.expected !== undefined) && (
+                                            <div>
+                                                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                                                    Expected Output:
+                                                </div>
+                                                <div className="mockup-code bg-base-300 text-base-content w-full">
+                                                    <pre className="whitespace-pre-wrap px-5 py-2 text-success font-mono text-sm">
+                                                        {(submissionResult.failedTestCase?.expected ?? submissionResult.expected) || '<empty>'}
+                                                    </pre>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                                                {submissionResult.status === 'RE' ? 'Error Details / Stderr:' : 'Your Output:'}
+                                            </div>
+                                            <div className="mockup-code bg-base-300 text-base-content w-full">
+                                                <pre className="whitespace-pre-wrap px-5 py-2 text-error font-mono text-sm">
+                                                    {(submissionResult.failedTestCase?.output ?? submissionResult.output) || '<no output>'}
+                                                </pre>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>

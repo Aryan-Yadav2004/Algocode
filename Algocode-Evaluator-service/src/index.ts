@@ -1,67 +1,60 @@
-import bodyParser from "body-parser"
-import express from 'express'
+import bodyParser from 'body-parser';
+import express from 'express';
 
-import serverConfig from './config/server.config.js'
-// import runCpp from "./containers/runCppDocker.js"
-// import sampleQueueProducer from './producers/sampleQueueProducer.js'
-import apiRouter from './routes/index.js'
-import { submission_queue } from "./utils/constanst.js"
-import errorHandler from './utils/errorHandler.js'
-import { SubmissionWorker } from "./workers/SubmissionWorker.js"
-const app = express()
+import logger from './config/logger.config.js';
+import serverConfig from './config/server.config.js';
+import pullImage from './containers/pullImage.js';
+import apiRouter from './routes/index.js';
+import { CPP_IMAGE, JAVA_IMAGE, PYTHON_IMAGE, submission_queue } from './utils/constanst.js';
+import errorHandler from './utils/errorHandler.js';
+import { SubmissionWorker } from './workers/SubmissionWorker.js';
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded())
-app.use(bodyParser.text())
+const app = express();
 
-app.use('/api', apiRouter)
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.text());
 
-app.use(errorHandler)
+app.use('/api', apiRouter);
 
+app.use(errorHandler);
 
 app.listen(serverConfig.PORT, () => {
-    console.log('server started at *:' + 3000);
-    SubmissionWorker(submission_queue);
+    logger.info(`[Server] Started on port ${serverConfig.PORT}`);
 
-    
+    // Warmup: pull all 3 Docker images in parallel when the server starts.
+    // This ensures images are local before any submission job runs, so executors
+    // don't need to call pullImage() individually on every submission.
+    //
+    // Each image failure is caught independently — one bad image doesn't block others.
+    // The worker starts alongside the warmup (not after), so startup time is unaffected.
+    void Promise.all([
+        pullImage(CPP_IMAGE).catch(err =>
+            logger.error(`[Warmup] Failed to pull ${CPP_IMAGE}: ${err.message}`),
+        ),
+        pullImage(JAVA_IMAGE).catch(err =>
+            logger.error(`[Warmup] Failed to pull ${JAVA_IMAGE}: ${err.message}`),
+        ),
+        pullImage(PYTHON_IMAGE).catch(err =>
+            logger.error(`[Warmup] Failed to pull ${PYTHON_IMAGE}: ${err.message}`),
+        ),
+    ]).then(() => {
+        logger.info('[Warmup] All Docker images ready');
+    });
 
-    // sampleQueueProducer('SampleJob',{
-    //     name: 'Ayush',
-    //     company: 'Microsoft',
-    //     position: 'SDE L61',
-    //     loaction: 'Remote | BLR | Nodia'
-    // },2).then(res => console.log(res + 'hi')).catch(err => console.log(err))
+    // Start the BullMQ worker and store the reference for graceful shutdown
+    const worker = SubmissionWorker(submission_queue);
 
-    // sampleQueueProducer('SampleJob',{
-    //     name: 'Aryan',
-    //     company: 'Microsoft',
-    //     position: 'SDE L61',
-    //     loaction: 'Remote | BLR | Nodia'
-    // },1).then(res => console.log(res + 'hi')).catch(err => console.log(err))
-   
-//     const code = `
-//     #include<iostream>
-//     using namespace std;
+    // Graceful shutdown — lets in-flight jobs finish before the process exits.
+    // Without this, a job could be killed mid-container execution, leaving
+    // orphaned Docker containers running on the host.
+    const shutdown = async (signal: string) => {
+        logger.info(`[Server] ${signal} received — closing worker gracefully`);
+        await worker.close();
+        logger.info('[Server] Worker closed. Exiting.');
+        process.exit(0);
+    };
 
-//     int main() {
-//         int x;
-//         cin>>x;
-//         cout<<"Value of x is "<<x<<endl;
-//         for(int i = 0; i < x; i++){
-//             cout<<i<<endl;
-//         }
-//         return 0;
-//     }
-// `
-
-//     const inputTestCase = '100';
-
-//     submissionQueueProducer({"1234" : {
-//         language: 'CPP',
-//         inputTestCase,
-//         code
-//     }});
-
-    // runCpp(code, inputTestCase);
-
-})
+    process.on('SIGTERM', () => void shutdown('SIGTERM'));
+    process.on('SIGINT',  () => void shutdown('SIGINT'));
+});
