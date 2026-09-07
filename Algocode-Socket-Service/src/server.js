@@ -8,11 +8,13 @@ const app = express();
 app.use(bodyParser.json());
 const httpServer = createServer(app);
 
-const redisCache = new Redis();// create redis client
+const redisHost = process.env.REDIS_HOST || '127.0.0.1';
+const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
+const redisCache = new Redis({ host: redisHost, port: redisPort }); // create redis client
 
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: process.env.CORS_ORIGIN || "*",
         methods: ['GET', 'POST'],
     }
 });
