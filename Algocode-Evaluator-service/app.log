@@ -27646,3 +27646,54 @@
 2026-09-08 02:40:16 [info]: [Warmup] All Docker images ready
 2026-09-08 02:40:59 [info]: [Server] Started on port 3003
 2026-09-08 02:41:00 [info]: [SubmissionWorker] Listening on queue: "SubmissionQueue"
+2026-09-08 02:41:06 [info]: [Server] Started on port 3003
+2026-09-08 02:41:06 [info]: [SubmissionWorker] Listening on queue: "SubmissionQueue"
+2026-09-08 02:41:08 [info]: [pullImage] openjdk:27-ea-jdk-trixie: Pulling from library/openjdk
+2026-09-08 02:41:08 [info]: [pullImage] python: Pulling from library/python
+2026-09-08 02:41:08 [info]: [pullImage] gcc:latest: Pulling from library/gcc
+2026-09-08 02:41:11 [info]: [pullImage] openjdk:27-ea-jdk-trixie: Digest: sha256:a4f2d413f4bfaa1f26d7e8c09f5f5619a58fa01b3fe660235be6b1453778b6e1
+2026-09-08 02:41:11 [info]: [pullImage] openjdk:27-ea-jdk-trixie: Status: Image is up to date for openjdk:27-ea-jdk-trixie
+2026-09-08 02:41:11 [info]: [pullImage] python: Digest: sha256:8edbf9e42c7fb168b9c523718ed907117e6d2e60f5889c0c499bbda3a787da53
+2026-09-08 02:41:11 [info]: [pullImage] python: Status: Image is up to date for python:latest
+2026-09-08 02:41:11 [info]: [pullImage] gcc:latest: Digest: sha256:b98be39c2378222af9dcab6a5b1707d74b47d7c413c8569d5429a4cbfefbe981
+2026-09-08 02:41:11 [info]: [pullImage] gcc:latest: Status: Image is up to date for gcc:latest
+2026-09-08 02:41:11 [info]: [Warmup] All Docker images ready
+2026-09-08 02:43:48 [info]: [CppExecutor] Container started — submissionId: 6a9f2909bdc9029b0fe8106c
+2026-09-08 02:44:06 [info]: [CppExecutor] Compiled successfully — running 10 test case(s)
+2026-09-08 02:44:06 [info]: [CppExecutor] Test case 0 passed ✓
+2026-09-08 02:44:06 [info]: [CppExecutor] Test case 1 passed ✓
+2026-09-08 02:44:06 [info]: [CppExecutor] Test case 2 passed ✓
+2026-09-08 02:44:06 [info]: [CppExecutor] Test case 3 passed ✓
+2026-09-08 02:44:06 [info]: [CppExecutor] Test case 4 passed ✓
+2026-09-08 02:44:06 [info]: [CppExecutor] Test case 5 passed ✓
+2026-09-08 02:44:07 [info]: [CppExecutor] Test case 6 passed ✓
+2026-09-08 02:44:07 [info]: [CppExecutor] Test case 7 passed ✓
+2026-09-08 02:44:07 [info]: [CppExecutor] Test case 8 passed ✓
+2026-09-08 02:44:07 [info]: [CppExecutor] Test case 9 passed ✓
+2026-09-08 02:44:07 [info]: [CppExecutor] Container removed — submissionId: 6a9f2909bdc9029b0fe8106c
+2026-09-08 02:44:19 [info]: [CppExecutor] Container started — submissionId: 6a9f292abdc9029b0fe8106f
+2026-09-08 02:44:26 [error]: [CppExecutor] Compile error: main.cpp: In member function 'int Solution::findCircleNum(std::vector<std::vector<int> >&)':
+main.cpp:31:9: error: 'vev' was not declared in this scope
+   31 |         vev
+      |         ^~~
+main.cpp:34:5: warning: no return statement in function returning non-void [-Wreturn-type]
+   34 |     }
+      |     ^
+
+2026-09-08 02:44:26 [info]: [CppExecutor] Container removed — submissionId: 6a9f292abdc9029b0fe8106f
+2026-09-08 02:50:23 [info]: [CppExecutor] Container started — submissionId: 6a9f2a96bdc9029b0fe81072
+2026-09-08 02:50:37 [info]: [CppExecutor] Compiled successfully — running 5 test case(s)
+2026-09-08 02:50:37 [info]: [CppExecutor] Test case 0 passed ✓
+2026-09-08 02:50:37 [info]: [CppExecutor] Test case 1 passed ✓
+2026-09-08 02:50:37 [info]: [CppExecutor] Test case 2 passed ✓
+2026-09-08 02:50:37 [info]: [CppExecutor] Test case 3 passed ✓
+2026-09-08 02:50:38 [info]: [CppExecutor] Test case 4 passed ✓
+2026-09-08 02:50:38 [info]: [CppExecutor] Container removed — submissionId: 6a9f2a96bdc9029b0fe81072
+2026-09-08 02:50:54 [info]: [JavaExecutor] Container started — submissionId: 6a9f2ab6bdc9029b0fe81075
+2026-09-08 02:51:01 [info]: [JavaExecutor] Compiled successfully — running 5 test case(s)
+2026-09-08 02:51:01 [info]: [JavaExecutor] Test case 0 passed ✓
+2026-09-08 02:51:02 [info]: [JavaExecutor] Test case 1 passed ✓
+2026-09-08 02:51:03 [info]: [JavaExecutor] Test case 2 passed ✓
+2026-09-08 02:51:03 [info]: [JavaExecutor] Test case 3 passed ✓
+2026-09-08 02:51:04 [info]: [JavaExecutor] Test case 4 passed ✓
+2026-09-08 02:51:04 [info]: [JavaExecutor] Container removed — submissionId: 6a9f2ab6bdc9029b0fe81075
