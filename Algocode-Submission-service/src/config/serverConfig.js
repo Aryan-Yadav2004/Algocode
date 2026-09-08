@@ -1,12 +1,13 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 const REDIS_PORT = process.env.REDIS_PORT || '6379';
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const ATLAS_DB_URL = process.env.ATLAS_DB_URL;
 const NODE_ENV = process.env.NODE_ENV;
-const PROBLEM_ADMIN_SERVICE_URL = process.env.PROBLEM_ADMIN_SERVICE_URL;
+const PROBLEM_ADMIN_SERVICE_URL = process.env.PROBLEM_ADMIN_SERVICE_URL || 'http://problem-service:3000';
+const SOCKET_SERVICE_URL = process.env.SOCKET_SERVICE_URL || 'http://socket-service:3004';
 export {
-    PORT, REDIS_HOST, REDIS_PORT, ATLAS_DB_URL, NODE_ENV, PROBLEM_ADMIN_SERVICE_URL
+    PORT, REDIS_HOST, REDIS_PORT, ATLAS_DB_URL, NODE_ENV, PROBLEM_ADMIN_SERVICE_URL, SOCKET_SERVICE_URL
 }

@@ -5,17 +5,19 @@ import connnectToDB from './config/dbConfig.js';
 import EvaluatorWorker from './worker/evaluatorWorker.js';
 import { evaluator_queue } from './config/constants.js';
 
-const fastify = Fastify({ logger: true }); //logger true krne se har request ka log automatically milta hai.
-
+const fastify = Fastify({ 
+    logger: true,
+    ignoreTrailingSlash: true 
+});
 
 fastify.register(app);
 
-fastify.listen({port: serviceConfig.PORT}, async (err) => {
+fastify.listen({ port: Number(serviceConfig.PORT) || 3001, host: '0.0.0.0' }, async (err) => {
     if (err) {
         fastify.log.error(err);
-        process.exit(1);//current running program ko turant band karne
+        process.exit(1);
     }
     await connnectToDB();
-    console.log(`Server up at port ${serviceConfig.PORT}`);
+    console.log(`Server up at port ${serviceConfig.PORT || 3001}`);
     EvaluatorWorker(evaluator_queue);
 }); 
