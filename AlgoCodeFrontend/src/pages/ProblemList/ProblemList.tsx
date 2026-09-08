@@ -6,6 +6,8 @@ import { ProblemData } from "../../types/problem.types";
 import { Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 
+import { cleanBaseUrl } from "../../utils/urlHelper";
+
 function ProblemList() {
     const [problems, setProblems] = useState<ProblemData[]>([]);
     const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ function ProblemList() {
     useEffect(() => {
         async function fetchProblems() {
             try {
-                const baseUrl = import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL || '';
+                const baseUrl = cleanBaseUrl(import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL);
                 const response = await axios.get(`${baseUrl}/api/v1/problems`);
                 console.log("Fetched problems:", response.data);
                 if (response.data && response.data.data) {

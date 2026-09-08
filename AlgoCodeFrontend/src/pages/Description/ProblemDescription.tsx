@@ -12,6 +12,7 @@ import Languages from '../../constants/Languages';
 import Themes from '../../constants/Themes';
 import { ProblemData } from '../../types/problem.types';
 import { establishSocketConnection, onSubmissionResponse } from '../../utils/socketConnection';
+import { cleanBaseUrl } from '../../utils/urlHelper';
 
 type languageSupport = {
     languageName: string,
@@ -44,7 +45,7 @@ function Description() {
     useEffect(() => {
         async function fetchProblem() {
             try {
-                const problemBaseUrl = import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL || '';
+                const problemBaseUrl = cleanBaseUrl(import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL);
                 const response = await axios.get(`${problemBaseUrl}/api/v1/problems/${id}`);
                 console.log(response);
                 if (response.data && response.data.data) {
@@ -92,7 +93,7 @@ function Description() {
         async function fetchSubmissions() {
             if (activeTab === 'submissions' && user) {
                 try {
-                    const submissionBaseUrl = import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL || '';
+                    const submissionBaseUrl = cleanBaseUrl(import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL);
                     const response = await axios.get(`${submissionBaseUrl}/api/v1/submission`, {
                         params: {
                             userId: user.id,
@@ -121,7 +122,7 @@ function Description() {
         try {
             console.log(code)
             console.log(language)
-            const submissionBaseUrl = import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL || '';
+            const submissionBaseUrl = cleanBaseUrl(import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL);
             const response = await axios.post(`${submissionBaseUrl}/api/v1/submission`, {
                 code,
                 language,

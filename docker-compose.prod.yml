@@ -75,9 +75,6 @@ services:
       context: ./AlgoCodeFrontend
       args:
         - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
-        - VITE_PROBLEM_SERVICE_BASE_URL=""
-        - VITE_SUBMISSION_SERVICE_BASE_URL=""
-        - VITE_SOCKET_URL=""
     container_name: algocode-frontend
     restart: always
     expose:

@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 
+import { cleanBaseUrl } from '../../utils/urlHelper';
+
 type TestCase = {
     input: string;
     output: string;
@@ -73,7 +75,7 @@ function CreateProblem() {
         console.log("Problem Data Payload:", JSON.stringify(problemData, null, 2));
 
         try {
-            const baseUrl = import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL || '';
+            const baseUrl = cleanBaseUrl(import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL);
             const response = await axios.post(`${baseUrl}/api/v1/problems`, problemData);
             console.log("Problem created successfully:", response.data);
             alert("Problem created successfully!");
