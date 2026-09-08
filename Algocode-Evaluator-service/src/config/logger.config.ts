@@ -17,11 +17,13 @@ allowedTransports.push(new winston.transports.Console({
     )
 }))
 
-allowedTransports.push(new winston.transports.MongoDB({
-    level: 'error',
-    db: serverConfig.LOG_DB_URL,
-    collection: 'logs',
-}))
+if (serverConfig.LOG_DB_URL) {
+    allowedTransports.push(new winston.transports.MongoDB({
+        level: 'error',
+        db: serverConfig.LOG_DB_URL,
+        collection: 'logs',
+    }))
+}
 
 allowedTransports.push(new winston.transports.File({
     filename: `app.log`
