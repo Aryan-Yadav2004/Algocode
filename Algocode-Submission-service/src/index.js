@@ -7,7 +7,9 @@ import { evaluator_queue } from './config/constants.js';
 
 const fastify = Fastify({ 
     logger: true,
-    ignoreTrailingSlash: true 
+    routerOptions: {
+        ignoreTrailingSlash: true 
+    }
 });
 
 fastify.register(app);
