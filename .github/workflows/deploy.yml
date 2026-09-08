@@ -40,11 +40,11 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
-            echo "==> 2. Writing environment secrets..."
-            cat << ENVFILE > .env
-            ATLAS_DB_URL=${ATLAS_DB_URL}
-            VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
-            ENVFILE
+            echo "==> 2. Ensuring environment secrets..."
+            if [ ! -f .env ]; then
+              echo "ATLAS_DB_URL=${ATLAS_DB_URL}" > .env
+              echo "VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}" >> .env
+            fi
 
             echo "==> 3. Building and running microservices..."
             docker compose -f docker-compose.prod.yml up -d --build
