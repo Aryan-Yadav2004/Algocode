@@ -44,7 +44,8 @@ function Description() {
     useEffect(() => {
         async function fetchProblem() {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL}/api/v1/problems/${id}`);
+                const problemBaseUrl = import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL || '';
+                const response = await axios.get(`${problemBaseUrl}/api/v1/problems/${id}`);
                 console.log(response);
                 if (response.data && response.data.data) {
                     const problem = response.data.data;
@@ -91,7 +92,8 @@ function Description() {
         async function fetchSubmissions() {
             if (activeTab === 'submissions' && user) {
                 try {
-                    const response = await axios.get(`${import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL}/api/v1/submission`, {
+                    const submissionBaseUrl = import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL || '';
+                    const response = await axios.get(`${submissionBaseUrl}/api/v1/submission`, {
                         params: {
                             userId: user.id,
                             problemId: id
@@ -119,7 +121,8 @@ function Description() {
         try {
             console.log(code)
             console.log(language)
-            const response = await axios.post(`${import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL}/api/v1/submission`, {
+            const submissionBaseUrl = import.meta.env.VITE_SUBMISSION_SERVICE_BASE_URL || '';
+            const response = await axios.post(`${submissionBaseUrl}/api/v1/submission`, {
                 code,
                 language,
                 userId: user.id,

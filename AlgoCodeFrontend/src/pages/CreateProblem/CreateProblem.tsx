@@ -73,7 +73,8 @@ function CreateProblem() {
         console.log("Problem Data Payload:", JSON.stringify(problemData, null, 2));
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL}/api/v1/problems`, problemData);
+            const baseUrl = import.meta.env.VITE_PROBLEM_SERVICE_BASE_URL || '';
+            const response = await axios.post(`${baseUrl}/api/v1/problems`, problemData);
             console.log("Problem created successfully:", response.data);
             alert("Problem created successfully!");
             navigate('/problems');
