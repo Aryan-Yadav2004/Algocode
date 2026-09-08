@@ -14,12 +14,16 @@ const fastify = Fastify({
 
 fastify.register(app);
 
-fastify.listen({ port: Number(serviceConfig.PORT) || 3001, host: '0.0.0.0' }, async (err) => {
-    if (err) {
-        fastify.log.error(err);
-        process.exit(1);
-    }
+const PORT = Number(serviceConfig.PORT) || 3001;
+const HOST = '0.0.0.0';
+
+try {
+    await fastify.listen({ port: PORT, host: HOST });
+    console.log(`[SubmissionService] Successfully listening on ${HOST}:${PORT}`);
     await connnectToDB();
-    console.log(`Server up at port ${serviceConfig.PORT || 3001}`);
+    console.log(`[SubmissionService] Connected to DB successfully`);
     EvaluatorWorker(evaluator_queue);
-}); 
+} catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+} 
